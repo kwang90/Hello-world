@@ -1,0 +1,11 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="ble.detection.bledetection.BLE_DetectionActivity" >
+
+    <item android:id="@+id/action_calibration"
+          android:icon="@drawable/target"
+          android:title="@string/calibation_setting"
+          android:showAsAction="ifRoom" />
+
+</menu>
