@@ -182,19 +182,14 @@ public class BLE_Activity extends ActionBarActivity implements BeaconListener {
 			@Override
 			public void run() {
 		    	myWebView.loadUrl("file:///android_asset/"+strRun);	
-		    	//Toast.makeText(c, newMac + "," +rssi, Toast.LENGTH_LONG).show();			
+		    	//Toast.makeText(c, newMac + "," +rssi, Toast.LENGTH_LONG).show();
 			}} );
 	}
 
 	@Override
 	public void onBeaconCalibration(final String mac, Integer avgRssi) {
 		
-		ACCESS_RSSI_THRESHOLD = avgRssi;	
-		runOnUiThread(new Runnable(){
-			@Override
-			public void run() {
-				//Toast.makeText(c, "ACCESS_RSSI_THRESHOLD Set to : "+ ACCESS_RSSI_THRESHOLD + "\nBy :" + mac, Toast.LENGTH_LONG).show();		
-			}} );
+		ACCESS_RSSI_THRESHOLD = avgRssi;
 	}
 
 }
