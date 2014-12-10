@@ -11,8 +11,9 @@ public class BLE_Scan {
 	
 	public static boolean CALIBRATION_ON = false;
 	public static boolean SCANNING_RUN= false;
-	private static int COUNTER_THRESHOLD = 5;	//Continuous appearance times of a beacon
-	private static long SCAN_PERIOD = 20000;	//Default scan period
+	private static int COUNTER_THRESHOLD = 9;	//Continuous appearance times of a beacon
+	private static int SAMPLE_NUMBER = 10;
+	private static long SCAN_PERIOD = 30000;	//Default scan period
 	private static int counter = 0;
 	private BeaconListener mListener;
 	private BluetoothAdapter mBluetoothAdapter;
@@ -90,15 +91,13 @@ public class BLE_Scan {
         {          	
         	//Only add devices in file "MAC_List.txt"
         	if (!macList.contains(device.getAddress()))
-        		return;
-        	
-			if(!deviceRssiMap.containsKey(device))
-		       deviceRssiMap.put(device, new ArrayList<Integer>());
-			else
-			   deviceRssiMap.get(device).add(rssi);
-   
-		   //Calculate Average RSSI values for the device as soon as 10 samples are collected
-		   if(deviceRssiMap.get(device).size() > 9)
+        		return;        	
+			if(!deviceRssiMap.containsKey(device))	
+				deviceRssiMap.put(device, new ArrayList<Integer>());
+			deviceRssiMap.get(device).add(rssi);
+
+		   //Calculate Average RSSI values for the device as soon as certain number of samples are collected
+		   if(deviceRssiMap.get(device).size() > SAMPLE_NUMBER)
 		   {
 			   int rssiSum = 0;
 			   for (Integer i : deviceRssiMap.get(device))
@@ -107,7 +106,7 @@ public class BLE_Scan {
 			   }
 			   deviceAvgRssi.put(device, rssiSum / deviceRssiMap.get(device).size());
 			   
-			   //Comparing all the devices by the average of 10 samples for each to obtain the loudest device
+			   //Comparing all the devices by the average of samples for each to obtain the loudest device
 			   mLoudestDevice = device;
 			   for (BluetoothDevice dev : deviceAvgRssi.keySet())
 			   {
@@ -121,7 +120,7 @@ public class BLE_Scan {
 			   if (preLoudestDevice == null || !preLoudestDevice.equals(mLoudestDevice))
 			   {
 				   preLoudestDevice = mLoudestDevice;
-				   counter = 0;
+				   counter = 1;
 				   pageLoaded = false;
 			   }
 			   else
@@ -137,11 +136,11 @@ public class BLE_Scan {
 			   //Calibration Mode
 			   if(CALIBRATION_ON)
 			   {
-				   mListener.onBeaconCalibration(mLoudestDevice.getAddress(), deviceAvgRssi.get(mLoudestDevice));
 				   CALIBRATION_ON = false;
+				   mListener.onBeaconCalibration(mLoudestDevice.getAddress(), deviceAvgRssi.get(mLoudestDevice));
 			   }
 			   
-			   //Keep the number of 10 samples, so the average RSSI value is always calculated by the latest 10 samples
+			   //Keep the number of samples, so the average RSSI value is always calculated by the latest samples
 			   deviceRssiMap.get(device).remove(0);
 		   }
         }

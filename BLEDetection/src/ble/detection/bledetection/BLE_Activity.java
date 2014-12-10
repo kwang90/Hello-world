@@ -3,7 +3,6 @@ package ble.detection.bledetection;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.HashMap;
 import android.support.v7.app.ActionBarActivity;
 import android.annotation.SuppressLint;
@@ -22,13 +21,14 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.Toast;
 
-@SuppressLint("SetJavaScriptEnabled")
+@SuppressLint({ "SetJavaScriptEnabled", "ShowToast" })
 public class BLE_Activity extends ActionBarActivity implements BeaconListener {
 
-	private static int ACCESS_RSSI_THRESHOLD = -45;
-	private final static long SCAN_PERIOD = 20000;
-    private final static long SCAN_SLEEP_PERIOD = 10000;
+	private static int ACCESS_RSSI_THRESHOLD = -55;
+	private final static long SCAN_PERIOD = 30000;
+    private final static long SCAN_SLEEP_PERIOD = 3000;
 	private static final int REQUEST_ENABLE_BT = 123;
+	//private BLE_Activity c;
 	private Thread mThread;
     private BLE_Scan mBLEScan;
 	private BluetoothAdapter mBluetoothAdapter;
@@ -82,7 +82,7 @@ public class BLE_Activity extends ActionBarActivity implements BeaconListener {
 						{
 							//Start Scanning BLE devices 
 							if(!BLE_Scan.SCANNING_RUN)
-								mBLEScan.bleScan(true, SCAN_PERIOD);							
+								mBLEScan.bleScan(true, SCAN_PERIOD);
 							//Stop updating for pre-defined period
 							sleep(SCAN_SLEEP_PERIOD);
 						}
@@ -168,7 +168,7 @@ public class BLE_Activity extends ActionBarActivity implements BeaconListener {
     /**
      * Callback method for loudest beacon changed
      */
-	public void onBeaconChanged(String newMac, Integer rssi) { 
+	public void onBeaconChanged(final String newMac, final Integer rssi) { 
     	
     	String url;
     	if(	rssi < ACCESS_RSSI_THRESHOLD )
@@ -176,15 +176,24 @@ public class BLE_Activity extends ActionBarActivity implements BeaconListener {
     	else
     		url = beaconsWebpage.get(newMac);
     	
-    	myWebView.loadUrl("file:///android_asset/"+url);
-    	Toast.makeText(this, newMac + "," +rssi, Toast.LENGTH_LONG).show();
+    	final String strRun = url;
+    	runOnUiThread(new Runnable(){
+			@Override
+			public void run() {
+		    	myWebView.loadUrl("file:///android_asset/"+strRun);	
+		    	//Toast.makeText(c, newMac + "," +rssi, Toast.LENGTH_LONG).show();			
+			}} );
 	}
 
 	@Override
-	public void onBeaconCalibration(String mac, Integer avgRssi) {
+	public void onBeaconCalibration(final String mac, Integer avgRssi) {
 		
-		ACCESS_RSSI_THRESHOLD = avgRssi;
-		Toast.makeText(this, "ACCESS_RSSI_THRESHOLD Set to : "+ ACCESS_RSSI_THRESHOLD + "\nBy :" + mac, Toast.LENGTH_LONG).show();
+		ACCESS_RSSI_THRESHOLD = avgRssi;	
+		runOnUiThread(new Runnable(){
+			@Override
+			public void run() {
+				//Toast.makeText(c, "ACCESS_RSSI_THRESHOLD Set to : "+ ACCESS_RSSI_THRESHOLD + "\nBy :" + mac, Toast.LENGTH_LONG).show();		
+			}} );
 	}
 
 }
